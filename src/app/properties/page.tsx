@@ -1,6 +1,8 @@
+import { createClient } from "@/lib/supabase/server";
 import PropertyCard, { type Property } from "@/components/PropertyCard";
+import Link from "next/link";
 
-const allProperties: Property[] = [
+const SEED: Property[] = [
   { id: "1", title: "Modern Downtown Penthouse", price: 1250000, type: "sale", beds: 3, baths: 2, sqft: 2100, address: "850 Market St", city: "San Francisco, CA", image: "", tag: "Featured" },
   { id: "2", title: "Spacious Mission District Home", price: 875000, type: "sale", beds: 4, baths: 3, sqft: 2800, address: "2340 Valencia St", city: "San Francisco, CA", image: "" },
   { id: "3", title: "Pacific Heights Luxury Apartment", price: 5500, type: "rent", beds: 2, baths: 2, sqft: 1400, address: "1820 Broadway", city: "San Francisco, CA", image: "", tag: "New" },
@@ -9,12 +11,50 @@ const allProperties: Property[] = [
   { id: "6", title: "Richmond District Bungalow", price: 995000, type: "sale", beds: 3, baths: 2, sqft: 1900, address: "512 Clement St", city: "San Francisco, CA", image: "" },
 ];
 
-export default function PropertiesPage() {
+async function getProperties(): Promise<Property[]> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("properties")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error || !data) return SEED;
+
+    return data.map((row) => ({
+      id: String(row.id),
+      title: row.title,
+      price: row.price,
+      type: row.type as "sale" | "rent",
+      beds: row.beds,
+      baths: row.baths,
+      sqft: row.sqft,
+      address: row.address,
+      city: row.city,
+      image: row.image_url ?? "",
+      tag: row.tag ?? undefined,
+    }));
+  } catch {
+    return SEED;
+  }
+}
+
+export default async function PropertiesPage() {
+  const properties = await getProperties();
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="mb-10">
-        <h1 className="text-3xl font-bold text-foreground mb-2">All Properties</h1>
-        <p className="text-muted">Browse our full portfolio of verified listings.</p>
+      <div className="flex items-end justify-between mb-10">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground mb-2">All Properties</h1>
+          <p className="text-muted">Browse our full portfolio of verified listings.</p>
+        </div>
+        <Link
+          href="/listings/new"
+          className="hidden sm:inline-flex bg-accent text-white text-sm font-semibold px-5 py-2 rounded-xl hover:bg-accent-light transition-colors"
+        >
+          + Add Listing
+        </Link>
       </div>
 
       {/* Filters */}
@@ -45,11 +85,20 @@ export default function PropertiesPage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {allProperties.map((p) => (
-          <PropertyCard key={p.id} property={p} />
-        ))}
-      </div>
+      {properties.length === 0 ? (
+        <div className="text-center py-20">
+          <p className="text-muted text-lg mb-4">No properties listed yet.</p>
+          <Link href="/listings/new" className="bg-primary text-white font-semibold px-6 py-3 rounded-xl hover:bg-primary-light transition-colors">
+            Be the first to list
+          </Link>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {properties.map((p) => (
+            <PropertyCard key={p.id} property={p} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
