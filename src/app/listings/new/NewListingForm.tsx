@@ -11,7 +11,7 @@ export default function NewListingForm() {
   const [state, action, pending] = useActionState(createProperty, undefined);
 
   return (
-    <form action={action} className="flex flex-col gap-5" encType="multipart/form-data">
+    <form action={action} className="flex flex-col gap-5">
       {state?.error && (
         <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
           {state.error}
