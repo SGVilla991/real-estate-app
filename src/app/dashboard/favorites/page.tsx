@@ -17,7 +17,7 @@ export default async function FavoritesPage() {
   const properties: Property[] = (favs ?? [])
     .filter((f) => f.properties)
     .map((f) => {
-      const r = f.properties as Record<string, unknown>;
+      const r = f.properties as unknown as Record<string, unknown>;
       return {
         id: String(r.id), title: r.title as string, price: r.price as number,
         type: r.type as "sale" | "rent", property_type: r.property_type as string,
