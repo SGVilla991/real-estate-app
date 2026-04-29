@@ -76,20 +76,18 @@ export async function createProperty(
   redirect("/properties");
 }
 
-export async function deleteProperty(propertyId: string) {
+export async function deleteProperty(propertyId: string): Promise<void> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "Not authenticated" };
+  if (!user) return;
 
-  const { error } = await supabase
+  await supabase
     .from("properties")
     .delete()
     .eq("id", propertyId)
     .eq("user_id", user.id);
 
-  if (error) return { error: error.message };
-
   revalidatePath("/properties");
   revalidatePath("/dashboard");
-  return { success: true };
+  redirect("/dashboard");
 }
