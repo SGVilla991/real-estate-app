@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import LoginForm from "./LoginForm";
 
 export default function LoginPage() {
@@ -9,7 +10,9 @@ export default function LoginPage() {
           <p className="text-muted mt-2">Sign in to your EstatePrime account</p>
         </div>
         <div className="bg-white border border-border rounded-2xl p-8 shadow-sm">
-          <LoginForm />
+          <Suspense fallback={<div className="h-64 animate-pulse bg-background rounded-xl" />}>
+            <LoginForm />
+          </Suspense>
         </div>
       </div>
     </div>
