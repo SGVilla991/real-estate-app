@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useEffect } from "react";
+import { useActionState } from "react";
 import { useSearchParams } from "next/navigation";
 import { login } from "@/app/actions/auth";
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
   const registered = searchParams.get("registered");
+  const confirmError = searchParams.get("error") === "confirmation_failed";
   const redirectTo = searchParams.get("redirectTo") ?? "";
 
   const [state, action, pending] = useActionState(login, undefined);
@@ -18,7 +19,13 @@ export default function LoginForm() {
 
       {registered && (
         <div className="bg-green-50 border border-green-200 text-green-800 text-sm rounded-xl px-4 py-3">
-          Account created! Please check your email to confirm, then log in.
+          ✓ Account created! Check your email and click the confirmation link, then sign in here.
+        </div>
+      )}
+
+      {confirmError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+          The confirmation link expired or is invalid. Please register again or contact support.
         </div>
       )}
 
